@@ -4,6 +4,7 @@ import com.solovev.model.And;
 import com.solovev.model.LogicElement;
 import com.solovev.model.Or;
 import com.solovev.model.Xor;
+import com.solovev.util.Elements;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -49,6 +50,9 @@ public class Main {
             });
             System.out.println();
         }
+        logicElements[1].fill(tests[1]);
+
+        System.out.println(Elements.unite(logicElements[1],new Or(3),logicElements[1]));
 
     }
 }

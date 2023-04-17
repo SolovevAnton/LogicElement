@@ -45,9 +45,10 @@ public abstract class LogicElement {
      * united element consists of arrays
      * @return Type of return is most closely related instance.If obj and arg are the same type - the object of this type will be returned.
      * new element booleans consists of both, with two arrays united
+     * @throws ClassCastException is elements are from different types
      */
     public <T extends LogicElement> T unite(T element) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        if( (element.getClass() != this.getClass())) { throw new ClassCastException("objects must have same type");}
+        if( (element.getClass() != this.getClass())) { throw new ClassCastException("Objects must have same type");}
         int totalLength = this.getLength() + element.getLength();
         // this object creation was solved using Google
         T unitedElement = (T) element.getClass().getConstructor(int.class).newInstance(totalLength);
