@@ -1,14 +1,13 @@
 package com.solovev;
 
-import com.solovev.factory.ElementFactory;
-import com.solovev.factory.Instances;
-import com.solovev.model.And;
+import com.solovev.factory.*;
 import com.solovev.model.LogicElement;
-import com.solovev.model.Or;
-import com.solovev.model.Xor;
-import com.solovev.util.Elements;
+import com.solovev.repository.ElementRepository;
 
-import java.util.Arrays;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Main {
 
@@ -22,38 +21,50 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        //Tests for first part of logic elements
-        LogicElement[] logicElements = {
-                new And(2),
-                new Or(2),
-                new Xor(2),
-        };
-
-        boolean[][] tests = {
-                {true, true},
-                {true, false},
-                {false, false}
-        };
-
-        for (LogicElement le : logicElements) {
-            Arrays.stream(tests).forEach(t -> Test(le, t));
-            System.out.println();
-        }
-        logicElements[1].fill(tests[1]);
-
-        System.out.println(Elements.unite(logicElements[1], new Or(3), logicElements[1]));
+//        //Tests for first part of logic elements
+//        LogicElement[] logicElements = {
+//                new And(2),
+//                new Or(2),
+//                new Xor(2),
+//        };
+//
+//        boolean[][] tests = {
+//                {true, true},
+//                {true, false},
+//                {false, false}
+//        };
+//
+//        for (LogicElement le : logicElements) {
+//            Arrays.stream(tests).forEach(t -> Test(le, t));
+//            System.out.println();
+//        }
+//        logicElements[1].fill(tests[1]);
+//
+//        System.out.println(Elements.unite(logicElements[1], new Or(3), logicElements[1]));
 
         //Tests of second part
-        Instances[] allEnum = {
-            Instances.AND,
-            Instances.OR,
-            Instances.XOR
+        FactoryEnum[] allEnum = {
+                FactoryEnum.AND,
+                FactoryEnum.OR,
+                FactoryEnum.XOR,
+                null
         };
         //test 1
-        int numberOfIns = 5;
-        for(Instances in: allEnum ){
-            System.out.println(ElementFactory.newInstance(in,numberOfIns));
+        int numberOfIns = 2;
+        for (FactoryEnum in : allEnum) {
+            System.out.println(ElementFactory.newInstance(in, numberOfIns));
         }
+        //test 2
+        Map<String, ElementFactoryI> factoryMap = new HashMap<>();
+        factoryMap.put("AND",new AndFactory());
+        factoryMap.put("OR",new OrFactory());
+        factoryMap.put("XOR",new XorFactory());
+
+        File filePath =new File("D:\\Git\\Practice_Projects\\LogicElement\\elements.csv");
+        try {
+            ElementRepository t1 = new ElementRepository(filePath, factoryMap);
+            System.out.println(t1);
+        } catch (IOException e) { e.printStackTrace();}
 
     }
 }
