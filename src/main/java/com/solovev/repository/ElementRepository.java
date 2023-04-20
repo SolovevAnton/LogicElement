@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -19,11 +20,15 @@ public class ElementRepository {
     private ArrayList<LogicElement> LogicElements = new ArrayList<>();
 
     /**
-     * constructor of the class to fill the list of logic elements with values from the cvs file
+     * constructor of the class to fill the list of logic elements with values from the cvs file,
+     * all incorrect data will just be ignored;
+     * Examples:
+     * Whole line that will NOT start from AND,OR,XOR;
+     * Word "true1" will be ignored when parsing
      *
-     * @param file //file name
-     * @param map  //Map of names of the logic elements as well as their factories
-     * @throws IOException //in case file does not exist
+     * @param file file name
+     * @param map  Map of names of the logic elements as well as their factories
+     * @throws IOException in case file does not exist
      */
     public ElementRepository(File file, Map<String, ElementFactoryI> map) throws IOException {
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file))) {
@@ -31,35 +36,49 @@ public class ElementRepository {
             int elementToStartWith = 1; //cannot be less than 1
 
             while ((line = bufferedReader.readLine()) != null) {
-                String[] separated = line.split(SEPARATOR);
+
+                Queue<String> separated = Arrays.stream(line.split(SEPARATOR))
+                        .collect(Collectors.toCollection(ArrayDeque::new));
+
                 LogicElement logicElement = map
                         .get(separated[elementToStartWith - 1])
                         .newInstance(separated.length - elementToStartWith);
-                logicElement.fill(getBooleans(separated, elementToStartWith));
+                logicElement.fill(getBooleans(separated));
                 LogicElements.add(logicElement);
             }
         }
     }
 
     /**
-     * Method that creates an array of parsed booleans, starting with some element from the array of strings
+     * Method that creates an array of parsed booleans,Queue of
+     * Strings. Only String that is exactly "true" ar "false" case Ignored after strip(), others are skipped
+     * Example:
+     * "fAlse " -> false, "fa lse" -> ignored
      *
-     * @param startWith element of the array to start with
-     * @param arr       of strings to be made boolean[]
-     * @return booleans array
+     * @param queue of strings to be made boolean[]
+     * @return booleans array, empty array if nothing matched
      */
-    private boolean[] getBooleans(String[] arr, int startWith) {
-        boolean[] booleans = new boolean[arr.length - startWith];
-        for (int i = startWith, j = 0; i < arr.length; i++, j++) {
-            booleans[j] = Boolean.parseBoolean(arr[i]);
+    private boolean[] getBooleans(Queue<String> queue) {
+        Predicate<String> isBooleanString = s -> s.equalsIgnoreCase("true") || s.equalsIgnoreCase("false");
+        List<Boolean> listOfBooleans = queue
+                .stream()
+                .map(String::strip)
+                .filter(isBooleanString)
+                .map(Boolean::parseBoolean)
+                .toList();
+        boolean[] booleans = new boolean[listOfBooleans.size()];
+        for(int i = 0; i < listOfBooleans.size(); i++){
+            booleans[i] = listOfBooleans.get(i);
         }
         return booleans;
     }
 
+
     @Override
     public String toString() {
         return "ElementRepository{" +
-                "LogicElements=" + listToString(LogicElements) +
+                "LogicElements=[\n" + listToString(LogicElements) +
+                "\n]" +
                 '}';
     }
 
@@ -73,6 +92,6 @@ public class ElementRepository {
         return list
                 .stream()
                 .map(LogicElement::toString)
-                .collect(Collectors.joining("\n"));
+                .collect(Collectors.joining(",\n"));
     }
 }

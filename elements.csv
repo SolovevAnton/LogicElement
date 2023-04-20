@@ -1,8 +1,7 @@
-AND;true;true;true;false;true
-AND;true;true;
-AND;true;false;
-AND;false;false;
-OR;false;false;
+AND;true;true;corruptedTrue
+AND;true;false;null;
+AND;false;false; ;
+OR;false;false;true
 OR;false;true;
 OR;true;true;
 OR;true;true;false;false;
