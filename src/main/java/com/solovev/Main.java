@@ -1,18 +1,18 @@
 package com.solovev;
 
+import com.solovev.factory.ElementFactory;
+import com.solovev.factory.Instances;
 import com.solovev.model.And;
 import com.solovev.model.LogicElement;
 import com.solovev.model.Or;
 import com.solovev.model.Xor;
 import com.solovev.util.Elements;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Main {
 
-    static private void Test(LogicElement le, boolean...test) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    static private void Test(LogicElement le, boolean... test) {
         le.fill(test);
         le.result();
         System.out.println(le);
@@ -21,12 +21,13 @@ public class Main {
         System.out.println(united);
     }
 
-    public static void main(String[] args) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public static void main(String[] args) {
+        //Tests for first part of logic elements
         LogicElement[] logicElements = {
-            new And(2),
-            new Or(2),
-            new Xor(2),
-    };
+                new And(2),
+                new Or(2),
+                new Xor(2),
+        };
 
         boolean[][] tests = {
                 {true, true},
@@ -34,25 +35,25 @@ public class Main {
                 {false, false}
         };
 
-        for (LogicElement le: logicElements) {
-            Arrays.stream(tests).forEach(t-> {
-                try {
-                    Test(le,t);
-                } catch (InvocationTargetException e) {
-                    throw new RuntimeException(e);
-                } catch (NoSuchMethodException e) {
-                    throw new RuntimeException(e);
-                } catch (InstantiationException e) {
-                    throw new RuntimeException(e);
-                } catch (IllegalAccessException e) {
-                    throw new RuntimeException(e);
-                }
-            });
+        for (LogicElement le : logicElements) {
+            Arrays.stream(tests).forEach(t -> Test(le, t));
             System.out.println();
         }
         logicElements[1].fill(tests[1]);
 
-        System.out.println(Elements.unite(logicElements[1],new Or(3),logicElements[1]));
+        System.out.println(Elements.unite(logicElements[1], new Or(3), logicElements[1]));
+
+        //Tests of second part
+        Instances[] allEnum = {
+            Instances.AND,
+            Instances.OR,
+            Instances.XOR
+        };
+        //test 1
+        int numberOfIns = 5;
+        for(Instances in: allEnum ){
+            System.out.println(ElementFactory.newInstance(in,numberOfIns));
+        }
 
     }
 }
