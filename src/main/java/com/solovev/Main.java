@@ -6,7 +6,10 @@ import com.solovev.repository.ElementRepository;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.annotation.ElementType;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Main {
@@ -54,17 +57,38 @@ public class Main {
         for (FactoryEnum in : allEnum) {
             System.out.println(ElementFactory.newInstance(in, numberOfIns));
         }
-        //test 2
+        //test 3
         Map<String, ElementFactoryI> factoryMap = new HashMap<>();
-        factoryMap.put("AND",new AndFactory());
-        factoryMap.put("OR",new OrFactory());
-        factoryMap.put("XOR",new XorFactory());
+        factoryMap.put("AND", new AndFactory());
+        factoryMap.put("OR", new OrFactory());
+        factoryMap.put("XOR", new XorFactory());
 
-        File filePath =new File("D:\\Git\\Practice_Projects\\LogicElement\\elements.csv");
+        File filePath = new File("D:\\Git\\Practice_Projects\\LogicElement\\elements.csv");
         try {
-            ElementRepository t1 = new ElementRepository(filePath, factoryMap);
-            System.out.println(t1);
-        } catch (IOException e) { e.printStackTrace();}
+            ElementRepository elementRepository = new ElementRepository(filePath, factoryMap);
+            System.out.println(elementRepository + "\n");
+            //Sorting tests
+            List<Comparator<LogicElement>> comparators = List.of(
+                    Comparator.comparing(LogicElement::getLength),
+                    Comparator.comparing(LogicElement::result),
+                    Comparator.comparing(le -> le.getClass().getSimpleName())
+            );
+            elementRepository.sort();
+            System.out.println(elementRepository + "\n");
+            for (Comparator<LogicElement> c : comparators) {
+                elementRepository.sort(c);
+                System.out.println(elementRepository + "\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //test 5
+        try{
+            ElementRepository elementRepository= new ElementRepository(filePath);
+            System.out.println(elementRepository +"/n");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 }

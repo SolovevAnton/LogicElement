@@ -1,12 +1,11 @@
 package com.solovev.repository;
 
+import com.solovev.factory.ElementFactory;
 import com.solovev.factory.ElementFactoryI;
+import com.solovev.factory.FactoryEnum;
 import com.solovev.model.LogicElement;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -20,10 +19,10 @@ public class ElementRepository {
     private ArrayList<LogicElement> LogicElements = new ArrayList<>();
 
     /**
-     * constructor of the class to fill the list of logic elements with values from the cvs file,
+     * Constructor of the class to fill the list of logic elements with values from the cvs file,
      * all incorrect data will just be ignored;
      * Examples:
-     * Whole line that will NOT start from AND,OR,XOR;
+     * Whole line that will NOT start from map key will be ignored;
      * Word "true1" will be ignored when parsing
      *
      * @param file file name
@@ -33,18 +32,65 @@ public class ElementRepository {
     public ElementRepository(File file, Map<String, ElementFactoryI> map) throws IOException {
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file))) {
             String line;
-            int elementToStartWith = 1; //cannot be less than 1
-
+            int lineCounter = 1;
             while ((line = bufferedReader.readLine()) != null) {
-
                 Queue<String> separated = Arrays.stream(line.split(SEPARATOR))
                         .collect(Collectors.toCollection(ArrayDeque::new));
+                try {
+                    String startsWith = separated.poll().strip();
+                    ElementFactoryI logicElementFactory = map.get(startsWith);
+                    if (logicElementFactory == null) {
+                        throw new InvalidObjectException(
+                                String.format(" Line#%d skipped; Started with:\"%s\" ;To be parsed line have to start from: %s", lineCounter, startsWith, map.keySet()));
+                    }
+                    boolean[] booleans = getBooleans(separated);
+                    LogicElement logicElement = logicElementFactory.newInstance(booleans.length);
+                    logicElement.fill(getBooleans(separated));
+                    LogicElements.add(logicElement);
+                } catch (InvalidObjectException e) {
+                    System.err.println(e);
+                } finally {
+                    lineCounter++;
+                }
+            }
+        }
+    }
 
-                LogicElement logicElement = map
-                        .get(separated[elementToStartWith - 1])
-                        .newInstance(separated.length - elementToStartWith);
-                logicElement.fill(getBooleans(separated));
-                LogicElements.add(logicElement);
+    /**
+     * Constructor of the class to fill the list of logic elements with values from the cvs file,
+     * all incorrect data will just be ignored;
+     * Examples:
+     * Whole line that will NOT start from AND,OR,XOR (will be striped());
+     * Word "true1" will be ignored when parsing
+     *
+     * @param file file name
+     * @throws IOException in case file does not exist
+     */
+    public ElementRepository(File file) throws IOException {
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file))) {
+            String line;
+            int lineCounter = 1;
+            while ((line = bufferedReader.readLine()) != null) {
+                Queue<String> separated = Arrays.stream(line.split(SEPARATOR))
+                        .collect(Collectors.toCollection(ArrayDeque::new));
+                String startsWith = separated.poll().strip();
+                try {
+
+                    FactoryEnum type = FactoryEnum.valueOf(startsWith);
+                    boolean[] booleans = getBooleans(separated);
+                    LogicElement logicElement = ElementFactory
+                            .newInstance(type, booleans.length);
+                    logicElement.fill(booleans);
+                    LogicElements.add(logicElement);
+                } catch (IllegalArgumentException e) {
+                String message = String.format(" Line#%d skipped; Started with:\"%s\" ;To be parsed line have to start from: %s",
+                        lineCounter,
+                        startsWith,
+                        Arrays.toString(FactoryEnum.values()));
+                System.err.println(e + message);
+                } finally {
+                    lineCounter++;
+                }
             }
         }
     }
@@ -67,19 +113,26 @@ public class ElementRepository {
                 .map(Boolean::parseBoolean)
                 .toList();
         boolean[] booleans = new boolean[listOfBooleans.size()];
-        for(int i = 0; i < listOfBooleans.size(); i++){
+        for (int i = 0; i < listOfBooleans.size(); i++) {
             booleans[i] = listOfBooleans.get(i);
         }
         return booleans;
     }
 
+    /**
+     * Method to sort collection in this object by natural order
+     */
+    public void sort() {
+        LogicElements.sort(Comparator.naturalOrder());
+    }
 
-    @Override
-    public String toString() {
-        return "ElementRepository{" +
-                "LogicElements=[\n" + listToString(LogicElements) +
-                "\n]" +
-                '}';
+    /**
+     * Method to sort collection based on the given Comparator
+     *
+     * @param comparator to sort LogicElements List
+     */
+    public void sort(Comparator<LogicElement> comparator) {
+        LogicElements.sort(comparator);
     }
 
     /**
@@ -94,4 +147,14 @@ public class ElementRepository {
                 .map(LogicElement::toString)
                 .collect(Collectors.joining(",\n"));
     }
+
+    @Override
+    public String toString() {
+        return "ElementRepository{" +
+                "LogicElements=[\n" + listToString(LogicElements) +
+                "\n]" +
+                '}';
+    }
+
+
 }

@@ -1,11 +1,16 @@
-AND;true;true;corruptedTrue
-AND;true;false;null;
+AND;tRuE;true;corruptedTrue
+AND   ;null; true ;false;null;
 AND;false;false; ;
+AND;empty;
+corruptedData
+XOR;false;true;
+
+ XOR ;true;true;
 OR;false;false;true
 OR;false;true;
+
 OR;true;true;
+or; true;true;
 OR;true;true;false;false;
 XOR;true;true;false;false;
 XOR;false;false;
-XOR;false;true;
-XOR;true;true;

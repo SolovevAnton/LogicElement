@@ -1,8 +1,9 @@
 package com.solovev.model;
 
 import java.util.Arrays;
+import java.util.Comparator;
 
-public abstract class LogicElement {
+public abstract class LogicElement implements Comparable<LogicElement> {
     private final boolean[] booleans;
 
     public LogicElement(int inCount) {
@@ -35,9 +36,12 @@ public abstract class LogicElement {
      * method to calculate results from booleans array sequentially using operation(). Field out will have this result
      * Example: [true,true,true] -> operation is AND -> true ; [true,true,false] -> operation is AND -> false
      *
-     * @return the final result of out; if booleans length is one  result will always be booleans[0]
+     * @return the final result of out; if booleans length is one  result will always be booleans[0], if booleans is empty result will be false
      **/
     public boolean result() {
+        if (booleans.length < 1) {
+            return false;
+        }
         boolean out = booleans[0];
         for (int i = 1; i < booleans.length; i++) {
             out = operation(out, booleans[i]);
@@ -67,6 +71,31 @@ public abstract class LogicElement {
         } catch (Exception ignored) {
         }
         return null;
+    }
+
+    /**
+     * Method to get Length of the booleans
+     *
+     * @return length of the booleans array
+     */
+    private int length() {
+        return booleans.length;
+    }
+
+    /**
+     * Method compares two LogicElements
+     * Compartment is done by: Type(lexicographical order), then by length, then by Out
+     *
+     * @param other the object to be compared.
+     * @return int > 0 if this>other, 0 if this == other, int<0 otherwise
+     */
+    @Override
+    public int compareTo(LogicElement other) {
+        return Comparator
+                .comparing((LogicElement le) -> le.getClass().getSimpleName())
+                .thenComparing(LogicElement::length)
+                .thenComparing(LogicElement::result)
+                .compare(this, other);
     }
 
     @Override
