@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 public class ElementRepository {
     //csv separator
     private static final String SEPARATOR = ";";
-    private ArrayList<LogicElement> LogicElements = new ArrayList<>();
+    private final ArrayList<LogicElement> LogicElements = new ArrayList<>();
 
     /**
      * Constructor of the class to fill the list of logic elements with values from the cvs file,
@@ -34,14 +34,12 @@ public class ElementRepository {
             String line;
             int lineCounter = 1;
             while ((line = bufferedReader.readLine()) != null) {
-                Queue<String> separated = Arrays.stream(line.split(SEPARATOR))
-                        .collect(Collectors.toCollection(ArrayDeque::new));
+                Queue<String> separated = Arrays.stream(line.split(SEPARATOR)).collect(Collectors.toCollection(ArrayDeque::new));
                 try {
                     String startsWith = separated.poll().strip();
                     ElementFactoryI logicElementFactory = map.get(startsWith);
                     if (logicElementFactory == null) {
-                        throw new InvalidObjectException(
-                                String.format(" Line#%d skipped; Started with:\"%s\" ;To be parsed line have to start from: %s", lineCounter, startsWith, map.keySet()));
+                        throw new InvalidObjectException(String.format(" Line#%d skipped; Started with:\"%s\" ;To be parsed line have to start from: %s", lineCounter, startsWith, map.keySet()));
                     }
                     boolean[] booleans = getBooleans(separated);
                     LogicElement logicElement = logicElementFactory.newInstance(booleans.length);
@@ -71,23 +69,18 @@ public class ElementRepository {
             String line;
             int lineCounter = 1;
             while ((line = bufferedReader.readLine()) != null) {
-                Queue<String> separated = Arrays.stream(line.split(SEPARATOR))
-                        .collect(Collectors.toCollection(ArrayDeque::new));
+                Queue<String> separated = Arrays.stream(line.split(SEPARATOR)).collect(Collectors.toCollection(ArrayDeque::new));
                 String startsWith = separated.poll().strip();
                 try {
 
                     FactoryEnum type = FactoryEnum.valueOf(startsWith);
                     boolean[] booleans = getBooleans(separated);
-                    LogicElement logicElement = ElementFactory
-                            .newInstance(type, booleans.length);
+                    LogicElement logicElement = ElementFactory.newInstance(type, booleans.length);
                     logicElement.fill(booleans);
                     LogicElements.add(logicElement);
                 } catch (IllegalArgumentException e) {
-                String message = String.format(" Line#%d skipped; Started with:\"%s\" ;To be parsed line have to start from: %s",
-                        lineCounter,
-                        startsWith,
-                        Arrays.toString(FactoryEnum.values()));
-                System.err.println(e + message);
+                    String message = String.format(" Line#%d skipped; Started with:\"%s\" ;To be parsed line have to start from: %s", lineCounter, startsWith, Arrays.toString(FactoryEnum.values()));
+                    System.err.println(e + message);
                 } finally {
                     lineCounter++;
                 }
@@ -106,12 +99,7 @@ public class ElementRepository {
      */
     private boolean[] getBooleans(Queue<String> queue) {
         Predicate<String> isBooleanString = s -> s.equalsIgnoreCase("true") || s.equalsIgnoreCase("false");
-        List<Boolean> listOfBooleans = queue
-                .stream()
-                .map(String::strip)
-                .filter(isBooleanString)
-                .map(Boolean::parseBoolean)
-                .toList();
+        List<Boolean> listOfBooleans = queue.stream().map(String::strip).filter(isBooleanString).map(Boolean::parseBoolean).toList();
         boolean[] booleans = new boolean[listOfBooleans.size()];
         for (int i = 0; i < listOfBooleans.size(); i++) {
             booleans[i] = listOfBooleans.get(i);
@@ -142,18 +130,12 @@ public class ElementRepository {
      * @return string
      */
     private String listToString(List<LogicElement> list) {
-        return list
-                .stream()
-                .map(LogicElement::toString)
-                .collect(Collectors.joining(",\n"));
+        return list.stream().map(LogicElement::toString).collect(Collectors.joining(",\n"));
     }
 
     @Override
     public String toString() {
-        return "ElementRepository{" +
-                "LogicElements=[\n" + listToString(LogicElements) +
-                "\n]" +
-                '}';
+        return "ElementRepository{" + "LogicElements=[\n" + listToString(LogicElements) + "\n]" + '}';
     }
 
 

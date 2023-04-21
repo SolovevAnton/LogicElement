@@ -1,6 +1,7 @@
 # LogicElement
-Practice project about inheritance
-First part done in 4 h
+Practice project about inheritance, factories and cvs files reading
+First part done in 4h
+Second part done in 5h
 
 ## Task
 ### First part
